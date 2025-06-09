@@ -23,11 +23,7 @@
 				user.set(pb.authStore.model);
 				goto('/dashboard');
 			} catch (err) {
-				if (err instanceof Error) {
-					error = err.message;
-				} else {
-					error = 'An unknown error occurred';
-				}
+				error = err instanceof Error ? err.message : 'An unknown error occurred';
 			}
 		} else {
 			try {
@@ -35,11 +31,7 @@
 				user.set(pb.authStore.model);
 				goto('/dashboard');
 			} catch (err) {
-				if (err instanceof Error) {
-					error = err.message;
-				} else {
-					error = 'An unknown error occurred';
-				}
+				error = err instanceof Error ? err.message : 'An unknown error occurred';
 			}
 		}
 	}
@@ -50,29 +42,71 @@
 	}
 </script>
 
-<h2>{mode === 'signup' ? 'Sign Up' : 'Log In'}</h2>
+<div class="h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-50 px-4">
+	<div class="w-full max-w-md bg-white p-8 rounded-xl shadow-md">
+		<h2 class="text-2xl font-bold text-center text-gray-800 mb-6">
+			{mode === 'signup' ? 'Sign Up' : 'Log In'}
+		</h2>
 
-<form on:submit|preventDefault={submit}>
-	<input type="email" bind:value={email} placeholder="Email" required />
-	<input type="password" bind:value={password} placeholder="Password" required />
+		<form on:submit|preventDefault={submit} class="space-y-4">
+			<input
+				type="email"
+				bind:value={email}
+				placeholder="Email"
+				required
+				class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-300"
+			/>
 
-	{#if mode === 'signup'}
-		<input type="password" bind:value={passwordConfirm} placeholder="Confirm Password" required />
-	{/if}
+			<input
+				type="password"
+				bind:value={password}
+				placeholder="Password"
+				required
+				class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-300"
+			/>
 
-	<button type="submit">{mode === 'signup' ? 'Create Account' : 'Log In'}</button>
-</form>
+			{#if mode === 'signup'}
+				<input
+					type="password"
+					bind:value={passwordConfirm}
+					placeholder="Confirm Password"
+					required
+					class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-300"
+				/>
+			{/if}
 
-{#if error}
-	<p style="color:red">{error}</p>
-{/if}
+			<button
+				type="submit"
+				class="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 rounded-md text-lg font-medium transition"
+			>
+				{mode === 'signup' ? 'Create Account' : 'Log In'}
+			</button>
+		</form>
 
-<p>
-	{#if mode === 'signup'}
-		Already have an account?
-		<button on:click={toggleMode} type="button">Log In</button>
-	{:else}
-		Don’t have an account?
-		<button on:click={toggleMode} type="button">Sign Up</button>
-	{/if}
-</p>
+		{#if error}
+			<p class="text-red-600 text-sm text-center mt-4">{error}</p>
+		{/if}
+
+		<div class="text-center mt-6 text-sm text-gray-600">
+			{#if mode === 'signup'}
+				Already have an account?
+				<button
+					on:click={toggleMode}
+					type="button"
+					class="ml-1 text-purple-600 hover:underline"
+				>
+					Log In
+				</button>
+			{:else}
+				Don’t have an account?
+				<button
+					on:click={toggleMode}
+					type="button"
+					class="ml-1 text-purple-600 hover:underline"
+				>
+					Sign Up
+				</button>
+			{/if}
+		</div>
+	</div>
+</div>
