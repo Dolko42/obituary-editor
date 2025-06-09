@@ -8,3 +8,9 @@
 		}
 	};
 </script>
+
+<h1>Dashboard</h1>
+
+<div class="p-4">
+	<p>Welcome to your dashboard!</p>
+</div>
