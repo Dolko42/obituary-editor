@@ -1,0 +1,10 @@
+<script>
+	import { pb } from '$lib/pb';
+	import { redirect } from '@sveltejs/kit';
+
+	export const load = async () => {
+		if (!pb.authStore.isValid) {
+			throw redirect(302, '/signup');
+		}
+	};
+</script>

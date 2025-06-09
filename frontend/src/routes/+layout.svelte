@@ -7,7 +7,7 @@
 
 <Navbar />
 
-<div class="container">
+<div class="container pt-24">
 	{@render children()}
 </div>
 
@@ -15,6 +15,5 @@
 	.container {
 		max-width: 1200px;
 		margin: 0 auto;
-		padding: 2rem;
 	}
 </style>
