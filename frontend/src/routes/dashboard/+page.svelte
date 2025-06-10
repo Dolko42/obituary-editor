@@ -14,3 +14,12 @@
 <div class="p-4">
 	<p>Welcome to your dashboard!</p>
 </div>
+
+<a href="/templates">
+	<button
+		type="submit"
+		class="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-md text-lg font-medium transition"
+	>
+		+ New Obituary
+	</button>
+</a>

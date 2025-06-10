@@ -22,7 +22,7 @@
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center gap-4">
-          <a href="/" class="text-lg font-bold text-lavender-500 hover:text-lavender-600 transition-colors duration-200">Parte</a>
+          <a href="/" class="text-lg font-bold text-lavender-500 hover:text-lavender-600 transition-colors duration-200">Memora</a>
           <div class="hidden md:flex items-center gap-4">
             <li class={ $activePath === '/' ? 'active' : '' }><a class="nav-link" href="/">Home</a></li>
             <li class={ $activePath === '/dashboard' ? 'active' : '' }><a class="nav-link" href="/dashboard">Dashboard</a></li>
