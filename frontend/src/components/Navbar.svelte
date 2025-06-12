@@ -1,102 +1,155 @@
 <script>
-    import { page } from '$app/stores';
-    import { derived } from 'svelte/store';
-    import { user } from '$lib/stores/auth';
-    import { pb } from '$lib/pb';
-    import { onMount } from 'svelte';
-    import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+  import { derived } from 'svelte/store';
+  import { user } from '$lib/stores/auth';
+  import { pb } from '$lib/pb';
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
 
-    export let menuOpen = false;
-    
-    const activePath = derived(page, $page => $page.url.pathname);
-    
-    onMount(() => {
-      window.addEventListener('resize', () => {
-        if (window.innerWidth > 1024) {
-          menuOpen = false;
-        }
-      });
-    });
-  </script>
+  export let menuOpen = false;
   
-  <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-sm shadow-lg">
-    <div class="container mx-auto px-4">
-      <div class="flex items-center justify-between h-16">
-        <div class="flex items-center gap-4">
-          <a href="/" class="text-lg font-bold text-lavender-500 hover:text-lavender-600 transition-colors duration-200">Memora</a>
-          <div class="hidden md:flex items-center gap-4">
-            <li class={ $activePath === '/' ? 'active' : '' }><a class="nav-link" href="/">Home</a></li>
-            <li class={ $activePath === '/dashboard' ? 'active' : '' }><a class="nav-link" href="/dashboard">Dashboard</a></li>
-            <li class={ $activePath === '/templates' ? 'active' : '' }><a class="nav-link" href="/templates">Templates</a></li>
-            <li class={ $activePath === '/editor' ? 'active' : '' }><a class="nav-link" href="/editor">Editor</a></li>
-            <li class={ $activePath === '/profile' ? 'active' : '' }><a class="nav-link" href="/profile">Profile</a></li>
-          </div>
-        </div>
-        <div class="flex items-center gap-4">
-          {#if $user}
-            <button 
-              class="nav-button"
-              on:click={() => {
-                pb.authStore.clear();
-                goto('/sign-up');
-              }}
-              aria-label="Logout"
-            >
-              Logout
-            </button>
-          {:else}
-            <a 
-              href="/sign-up" 
-              class="nav-button"
-              aria-label="Sign Up"
-            >
-              Sign Up
-            </a>
-          {/if}
-          <button 
-            class="md:hidden"
-            on:click={() => menuOpen = !menuOpen}
-            aria-label="Toggle menu"
+  const activePath = derived(page, $page => $page.url.pathname);
+  
+  onMount(() => {
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1024) {
+        menuOpen = false;
+      }
+    });
+  });
+</script>
+
+<nav class="fixed w-full z-50 bg-white/90 backdrop-blur-sm shadow-lg">
+  <div class="container mx-auto px-4">
+    <div class="flex items-center justify-between h-16">
+      <div class="flex items-center gap-4">
+        <a href="/" class="text-lg font-bold text-fuchsia-500 hover:text-fuchsia-600 transition-colors duration-200">Memora</a>
+        <div class="hidden md:flex items-center gap-4">
+          <a 
+            href="/" 
+            class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {$activePath === '/' ? 'bg-fuchsia-100 text-fuchsia-700' : 'text-gray-600 hover:text-fuchsia-600 hover:bg-fuchsia-50'}"
           >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {#if menuOpen}
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              {:else}
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-              {/if}
-            </svg>
-          </button>
+            Home
+          </a>
+          <a 
+            href="/dashboard" 
+            class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {$activePath === '/dashboard' ? 'bg-fuchsia-100 text-fuchsia-700' : 'text-gray-600 hover:text-fuchsia-600 hover:bg-fuchsia-50'}"
+          >
+            Dashboard
+          </a>
+          <a 
+            href="/templates" 
+            class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {$activePath === '/templates' ? 'bg-fuchsia-100 text-fuchsia-700' : 'text-gray-600 hover:text-fuchsia-600 hover:bg-fuchsia-50'}"
+          >
+            Templates
+          </a>
+          <a 
+            href="/editor" 
+            class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {$activePath === '/editor' ? 'bg-fuchsia-100 text-fuchsia-700' : 'text-gray-600 hover:text-fuchsia-600 hover:bg-fuchsia-50'}"
+          >
+            Editor
+          </a>
+          <a 
+            href="/profile" 
+            class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {$activePath === '/profile' ? 'bg-fuchsia-100 text-fuchsia-700' : 'text-gray-600 hover:text-fuchsia-600 hover:bg-fuchsia-50'}"
+          >
+            Profile
+          </a>
         </div>
       </div>
-      
-      <!-- Mobile menu -->
-      {#if menuOpen}
-        <div class="md:hidden mt-4">
-          <div class="space-y-2">
-            <li class={ $activePath === '/' ? 'active' : '' }><a class="nav-link block" href="/">Home</a></li>
-            <li class={ $activePath === '/dashboard' ? 'active' : '' }><a class="nav-link block" href="/dashboard">Dashboard</a></li>
-            <li class={ $activePath === '/templates' ? 'active' : '' }><a class="nav-link block" href="/templates">Templates</a></li>
-            <li class={ $activePath === '/editor' ? 'active' : '' }><a class="nav-link block" href="/editor">Editor</a></li>
-            <li class={ $activePath === '/profile' ? 'active' : '' }><a class="nav-link block" href="/profile">Profile</a></li>
-          </div>
-          {#if $user}
-            <button 
-              class="nav-button block w-full"
-              on:click={() => pb.authStore.clear()}
-              aria-label="Logout"
-            >
-              Logout
-            </button>
-          {:else}
-            <a 
-              href="/sign-up" 
-              class="nav-button block w-full"
-              aria-label="Sign Up"
-            >
-              Sign Up
-            </a>
-          {/if}
-        </div>
-      {/if}
+      <div class="flex items-center gap-4">
+        {#if $user}
+          <button 
+            class="px-4 py-2 bg-fuchsia-100 text-fuchsia-500 rounded-md hover:bg-fuchsia-200 hover:cursor-pointer transition-colors duration-200"
+            on:click={() => {
+              pb.authStore.clear();
+              goto('/sign-up');
+            }}
+            aria-label="Logout"
+          >
+            Logout
+          </button>
+        {:else}
+          <a 
+            href="/sign-up" 
+            class="px-4 py-2 bg-fuchsia-500 text-white rounded-md hover:bg-fuchsia-600 hover:cursor-pointer transition-colors duration-200"
+            aria-label="Sign Up"
+          >
+            Sign Up
+          </a>
+        {/if}
+        <button 
+          class="md:hidden"
+          on:click={() => menuOpen = !menuOpen}
+          aria-label="Toggle menu"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {#if menuOpen}
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            {:else}
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            {/if}
+          </svg>
+        </button>
+      </div>
     </div>
-  </nav>
+    
+    <!-- Mobile menu -->
+    {#if menuOpen}
+      <div class="md:hidden mt-4">
+        <div class="space-y-2">
+          <a 
+            href="/" 
+            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {$activePath === '/' ? 'bg-fuchsia-100 text-fuchsia-700' : 'text-gray-600 hover:text-fuchsia-600 hover:bg-fuchsia-50'}"
+          >
+            Home
+          </a>
+          <a 
+            href="/dashboard" 
+            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {$activePath === '/dashboard' ? 'bg-fuchsia-100 text-fuchsia-700' : 'text-gray-600 hover:text-fuchsia-600 hover:bg-fuchsia-50'}"
+          >
+            Dashboard
+          </a>
+          <a 
+            href="/templates" 
+            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {$activePath === '/templates' ? 'bg-fuchsia-100 text-fuchsia-700' : 'text-gray-600 hover:text-fuchsia-600 hover:bg-fuchsia-50'}"
+          >
+            Templates
+          </a>
+          <a 
+            href="/editor" 
+            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {$activePath === '/editor' ? 'bg-fuchsia-100 text-fuchsia-700' : 'text-gray-600 hover:text-fuchsia-600 hover:bg-fuchsia-50'}"
+          >
+            Editor
+          </a>
+          <a 
+            href="/profile" 
+            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {$activePath === '/profile' ? 'bg-fuchsia-100 text-fuchsia-700' : 'text-gray-600 hover:text-fuchsia-600 hover:bg-fuchsia-50'}"
+          >
+            Profile
+          </a>
+        </div>
+        {#if $user}
+          <button 
+            class="block w-full px-4 py-2 bg-fuchsia-200 text-white rounded-md hover:bg-fuchsia-300 transition-colors duration-200"
+            on:click={() => {
+              pb.authStore.clear();
+              goto('/sign-up');
+            }}
+            aria-label="Logout"
+          >
+            Logout
+          </button>
+        {:else}
+          <a 
+            href="/sign-up" 
+            class="block w-full px-4 py-2 bg-fuchsia-500 text-white rounded-md hover:bg-fuchsia-600 active:bg-fuchsia-700 transition-colors duration-200 text-center"
+            aria-label="Sign Up"
+          >
+            Sign Up
+          </a>
+        {/if}
+      </div>
+    {/if}
+  </div>
+</nav>
