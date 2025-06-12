@@ -4,6 +4,7 @@
     import { user } from '$lib/stores/auth';
     import { pb } from '$lib/pb';
     import { onMount } from 'svelte';
+    import { goto } from '$app/navigation';
 
     export let menuOpen = false;
     
@@ -35,7 +36,10 @@
           {#if $user}
             <button 
               class="nav-button"
-              on:click={() => pb.authStore.clear()}
+              on:click={() => {
+                pb.authStore.clear();
+                goto('/sign-up');
+              }}
               aria-label="Logout"
             >
               Logout

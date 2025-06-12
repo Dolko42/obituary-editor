@@ -1,28 +1,56 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { templateComponents } from '$lib/templates';
-	import type { Component } from 'svelte';
+	import { pb } from '$lib/pb';
+	import TemplateBasic from '$lib/templates/TemplateBasic.svelte';
+	import TemplateMemora from '$lib/templates/TemplateMemora.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import type { Obituary, User } from '$lib/types';
 
+	let currentUser: User | null = null;
 	let selectedTemplate: string | null = null;
-	let TemplateComponent: Component | null = null;
 
-	async function loadTemplateComponent(templateId: string) {
-		if (templateId && templateComponents[templateId]) {
-			const component = await templateComponents[templateId]();
-			TemplateComponent = component.default;
-		} else {
-			TemplateComponent = null;
+	const checkAuth = () => {
+		if (!pb.authStore.isValid) {
+			goto('/sign-up');
 		}
-	}
+	};
 
-	onMount(() => {
+	checkAuth();
+
+	onMount(async () => {
+		try {
+			const authUser = await pb.authStore.model;
+			if (authUser) {
+				currentUser = {
+					id: authUser.id,
+					username: authUser.username,
+					email: authUser.email,
+					avatar: authUser.avatar || '',
+					created: authUser.created,
+					updated: authUser.updated,
+					verified: authUser.verified
+				};
+			}
+		} catch (err) {
+			console.error('Error getting current user:', err);
+		}
+		
 		const templateParam = $page.url.searchParams.get('template');
-		if (templateParam) {
-			selectedTemplate = templateParam;
-			loadTemplateComponent(templateParam);
+		if (!templateParam) {
+			console.error('No template parameter provided');
+			goto('/templates');
+			return;
 		}
+
+		// Validate template parameter
+		if (!['templateBasic', 'templateMemora'].includes(templateParam)) {
+			console.error('Invalid template:', templateParam);
+			goto('/templates');
+			return;
+		}
+
+		selectedTemplate = templateParam;
 	});
 
 	let first_name = '';
@@ -32,14 +60,55 @@
 	let notice = '';
 	let address = '';
 	let photo: File | null = null;
+	let photoUrl: string | null = null;
 	let error = '';
 	let success = false;
 
+	// Handle photo preview
+	function handlePhotoChange(e: Event) {
+		const target = e.target as HTMLInputElement;
+		const file = target.files?.[0] ?? null;
+		photo = file;
+		
+		if (file) {
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				photoUrl = e.target?.result as string;
+			};
+			reader.readAsDataURL(file);
+		} else {
+			photoUrl = null;
+		}
+	}
+
+	// Create obituary object for template
+	$: obituary = {
+		id: '',
+		first_name: first_name,
+		last_name: last_name,
+		birth_date: new Date(birth_date),
+		death_date: new Date(death_date),
+		created_by: currentUser || { id: '', username: '', email: '', avatar: '', created: '', updated: '', verified: false },
+		created: new Date(),
+		updated: new Date(),
+		notice: notice,
+		address: address,
+		photo: photoUrl || undefined,
+		template: selectedTemplate || 'templateBasic',
+		slug: `${first_name.toLowerCase()}-${last_name.toLowerCase()}`.replace(/\s+/g, '-')
+	} as Obituary;
+
 	async function submit() {
+		if (!currentUser) {
+			error = 'Please log in to create an obituary';
+			return;
+		}
+
 		error = '';
 		success = false;
 
 		try {
+			// Create FormData for file upload
 			const formData = new FormData();
 			formData.append('first_name', first_name);
 			formData.append('last_name', last_name);
@@ -47,15 +116,28 @@
 			formData.append('death_date', death_date);
 			formData.append('notice', notice);
 			formData.append('address', address);
-			formData.append('template_id', selectedTemplate!);
-			if (photo) formData.append('photo', photo);
+			formData.append('template', selectedTemplate || 'templateBasic');
+			formData.append('created_by', currentUser.id);
+			formData.append('slug', `${first_name.toLowerCase()}-${last_name.toLowerCase()}`.replace(/\s+/g, '-'));
+			
+			if (photo) {
+				formData.append('photo', photo);
+			}
 
-			// No need to fetch from database anymore, using local components directly
+			// Save to PocketBase
+			const record = await pb.collection('obituaries').create(formData);
+			console.log('Obituary created:', record);
 
 			success = true;
-			goto(`/dashboard/${selectedTemplate}`);
+			
+			// Redirect to dashboard after successful creation
+			setTimeout(() => {
+				goto('/dashboard');
+			}, 1000);
+			
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Unknown error';
+			console.error('Error creating obituary:', err);
+			error = err instanceof Error ? err.message : 'Failed to create obituary';
 		}
 	}
 </script>
@@ -101,20 +183,31 @@
 			</div>
 
 			<input
-					type="text"
-					placeholder="Address"
-					bind:value={address}
-					class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
-					required
-				/>
+				type="text"
+				placeholder="Address"
+				bind:value={address}
+				class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+				required
+			/>
 
-			<textarea bind:value={notice} placeholder="Obituary Notice" rows="4" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400" required></textarea>
+			<textarea 
+				bind:value={notice} 
+				placeholder="Obituary Notice" 
+				rows="4" 
+				class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400" 
+				required
+			></textarea>
 
-			<input type="file" accept="image/*" on:change={(e) => {
-				const target = e.target as HTMLInputElement;
-				photo = target.files?.[0] ?? null;
-			}} class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400" />
-
+			<input 
+				type="file" 
+				accept="image/*" 
+				on:change={handlePhotoChange}
+				class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400" 
+			/>
+			<input 
+				type="hidden" 
+				bind:value={selectedTemplate}
+			/>
 			{#if error}
 				<p class="text-red-600 text-sm">{error}</p>
 			{/if}
@@ -132,10 +225,19 @@
 	<div class="w-1/2 pl-6 border-l border-gray-300">
 		<h2 class="text-2xl font-semibold mb-6 text-gray-700">Template Preview</h2>
 
-		{#if TemplateComponent}
-			<svelte:component this={TemplateComponent} first_name={first_name} last_name={last_name} birth_date={birth_date} death_date={death_date} notice={notice} address={address} photo={photo} />
-		{:else}
-			<p>Select a template to preview</p>
-		{/if}
+		<div class="transform scale-75 origin-top">
+			{#if selectedTemplate === 'templateBasic'}
+				<TemplateBasic {obituary} />
+			{:else if selectedTemplate === 'templateMemora'}
+				<TemplateMemora {obituary} />
+			{:else}
+				<div class="text-center text-gray-500 py-8">
+					<p>Select a template to preview</p>
+					{#if selectedTemplate}
+						<p class="text-sm mt-2">Unknown template: {selectedTemplate}</p>
+					{/if}
+				</div>
+			{/if}
+		</div>
 	</div>
 </div>
