@@ -9,6 +9,7 @@
 
 	let currentUser: User | null = null;
 	let selectedTemplate: string | null = null;
+	let editId: string | null = null; // Store the ID when editing
 
 	const checkAuth = () => {
 		if (!pb.authStore.isValid) {
@@ -19,39 +20,52 @@
 	checkAuth();
 
 	onMount(async () => {
-		try {
-			const authUser = await pb.authStore.model;
-			if (authUser) {
-				currentUser = {
-					id: authUser.id,
-					username: authUser.username,
-					email: authUser.email,
-					avatar: authUser.avatar || '',
-					created: authUser.created,
-					updated: authUser.updated,
-					verified: authUser.verified
-				};
-			}
-		} catch (err) {
-			console.error('Error getting current user:', err);
-		}
-		
-		const templateParam = $page.url.searchParams.get('template');
-		if (!templateParam) {
-			console.error('No template parameter provided');
-			goto('/templates');
-			return;
-		}
+    try {
+        const authUser = await pb.authStore.model;
+        if (authUser) {
+            currentUser = {
+                id: authUser.id,
+                username: authUser.username,
+                email: authUser.email,
+                avatar: authUser.avatar || '',
+                created: authUser.created,
+                updated: authUser.updated,
+                verified: authUser.verified
+            };
+        }
+    } catch (err) {
+        console.error('Error getting current user:', err);
+    }
+    
+    const templateParam = $page.url.searchParams.get('template');
+    const editParam = $page.url.searchParams.get('edit');
+    if (!templateParam) {
+        console.error('No template parameter provided');
+        goto('/templates');
+        return;
+    }
 
-		// Validate template parameter
-		if (!['templateBasic', 'templateMemora'].includes(templateParam)) {
-			console.error('Invalid template:', templateParam);
-			goto('/templates');
-			return;
-		}
+    // If editing, load the existing obituary
+    if (editParam) {
+        editId = editParam;
+        try {
+            const obituary = await pb.collection('obituaries').getOne(editParam);
+            first_name = obituary.first_name;
+            last_name = obituary.last_name;
+            birth_date = new Date(obituary.birth_date).toISOString().split('T')[0];
+            death_date = new Date(obituary.death_date).toISOString().split('T')[0];
+            notice = obituary.notice;
+            address = obituary.address;
+            selectedTemplate = obituary.template;
+            photoUrl = obituary.photoUrl;
+        } catch (err) {
+            console.error('Error loading obituary for editing:', err);
+            return;
+        }
+    }
 
-		selectedTemplate = templateParam;
-	});
+    selectedTemplate = templateParam;
+});
 
 	let first_name = '';
 	let last_name = '';
@@ -125,8 +139,16 @@
 			}
 
 			// Save to PocketBase
-			const record = await pb.collection('obituaries').create(formData);
-			console.log('Obituary created:', record);
+			let record;
+			if (editId) {
+				// Update existing record
+				record = await pb.collection('obituaries').update(editId, formData);
+				console.log('Obituary updated:', record);
+			} else {
+				// Create new record
+				record = await pb.collection('obituaries').create(formData);
+				console.log('Obituary created:', record);
+			}
 
 			if (record.id && photo) {
 				const photoUrl = await pb.files.getURL(record, photo.name);
@@ -135,21 +157,21 @@
 
 			success = true;
 			
-			// Redirect to dashboard after successful creation
+			// Redirect to dashboard after successful update/creation
 			setTimeout(() => {
 				goto('/dashboard');
 			}, 1000);
 			
 		} catch (err) {
-			console.error('Error creating obituary:', err);
-			error = err instanceof Error ? err.message : 'Failed to create obituary';
+			console.error('Error saving obituary:', err);
+			error = err instanceof Error ? err.message : 'Failed to save obituary';
 		}
 	}
 </script>
 
 <div class="flex max-w-6xl mx-auto p-6 mt-10 bg-white rounded-xl shadow-lg">
 	<div class="w-1/2 pr-6">
-		<h2 class="text-2xl font-semibold text-center mb-6 text-gray-700">Create Obituary</h2>
+		<h2 class="text-2xl font-semibold text-center mb-6 text-gray-700">{editId ? 'Edit Obituary' : 'Create Obituary'}</h2>
 
 		<form on:submit|preventDefault={submit} class="space-y-4">
 			<div class="grid grid-cols-2 gap-4">
@@ -218,12 +240,9 @@
 			{/if}
 
 			{#if success}
-				<p class="text-green-600 text-sm">Obituary created successfully!</p>
+				<p class="text-green-600 text-sm">{editId ? 'Changes saved successfully!' : 'Obituary created successfully!'}</p>
 			{/if}
-
-			<button type="submit" class="w-full bg-purple-500 hover:bg-purple-600 hover:cursor-pointer text-white py-2 rounded-md text-lg font-medium transition">
-				Create Obituary
-			</button>
+			<button type="submit" class="w-full {editId ? 'bg-green-500 hover:bg-green-600' : 'bg-purple-500 hover:bg-purple-600'} hover:cursor-pointer text-white py-2 rounded-md text-lg font-medium transition">{editId ? 'Save Changes' : 'Create Obituary'}</button>
 		</form>
 	</div>
 

@@ -131,7 +131,7 @@
 							{formatDate(obituary.birth_date)} - {formatDate(obituary.death_date)}
 						</p>
 						<p class="text-xs text-gray-400 mb-3">
-							Template: {getTemplateName(obituary.template_id)}
+							Template: {getTemplateName(obituary.template)}
 						</p>
 						<p class="text-sm text-gray-600 mb-4 line-clamp-2">
 							{obituary.notice.substring(0, 100)}{obituary.notice.length > 100 ? '...' : ''}
