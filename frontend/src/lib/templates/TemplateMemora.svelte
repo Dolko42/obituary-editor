@@ -26,9 +26,9 @@
   
     <!-- Photo and dates -->
     <div class="flex flex-col items-center mb-8">
-      {#if obituary.photo}
+      {#if obituary.photoUrl}
         <img
-          src={obituary.photo}
+          src={obituary.photoUrl}
           alt="Photo of {obituary.first_name}"
           class="w-40 h-48 object-cover rounded-lg shadow-md mb-4 border-4 border-lavender-300"
         />

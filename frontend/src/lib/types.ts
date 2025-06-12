@@ -28,6 +28,7 @@ export interface Obituary {
 	notice: string;
 	address: string;
 	photo?: string;
+	photoUrl?: string;
 	template: string;
 	slug: string;
 }

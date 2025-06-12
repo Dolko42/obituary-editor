@@ -24,6 +24,15 @@
 		try {
 			obituary = await pb.collection('obituaries').getOne(obituaryId);
 			console.log('Loaded obituary:', obituary);
+			
+			// If there's a photo, fetch its URL
+			if (obituary.photo) {
+				try {
+					obituary.photoUrl = await pb.files.getURL(obituary, obituary.photo);
+				} catch (err) {
+					console.error('Error fetching photo URL:', err);
+				}
+			}
 		} catch (err) {
 			console.error('Error loading obituary:', err);
 			error = err instanceof Error ? err.message : 'Failed to load obituary';
@@ -40,7 +49,7 @@
 		deathDate: new Date(obituary.death_date).toLocaleDateString(),
 		noticeText: obituary.notice,
 		address: obituary.address,
-		photoUrl: obituary.photo ? pb.files.getURL(obituary, obituary.photo) : null
+		photo: obituary.photoUrl ? pb.files.getURL(obituary, obituary.photoUrl) : null
 	} : null;
 
 	function downloadPDF() {

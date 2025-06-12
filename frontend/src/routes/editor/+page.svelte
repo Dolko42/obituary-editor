@@ -121,12 +121,17 @@
 			formData.append('slug', `${first_name.toLowerCase()}-${last_name.toLowerCase()}`.replace(/\s+/g, '-'));
 			
 			if (photo) {
-				formData.append('photo', photo);
+				formData.append('photo', photo, photo.name);
 			}
 
 			// Save to PocketBase
 			const record = await pb.collection('obituaries').create(formData);
 			console.log('Obituary created:', record);
+
+			if (record.id && photo) {
+				const photoUrl = await pb.files.getURL(record, photo.name);
+				await pb.collection('obituaries').update(record.id, { photoUrl });
+			}
 
 			success = true;
 			

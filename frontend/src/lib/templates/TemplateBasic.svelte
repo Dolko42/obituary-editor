@@ -26,9 +26,9 @@
   
     <!-- Photo -->
     <div class="flex justify-center mb-6">
-      {#if obituary.photo}
+      {#if obituary.photoUrl}
         <img
-          src={obituary.photo}
+          src={obituary.photoUrl}
           alt="Photo of {obituary.first_name}"
           class="w-32 h-32 rounded-full border-2 border-gray-200 shadow-sm"
         />
