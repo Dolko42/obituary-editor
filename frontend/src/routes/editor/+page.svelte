@@ -169,6 +169,15 @@
 	}
 </script>
 
+<button 
+on:click={() => goto('/dashboard')}
+class="flex items-center text-gray-600 hover:text-gray-900 transition"
+>
+<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+	<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+</svg>
+Back to Dashboard
+</button>
 <div class="flex max-w-6xl mx-auto p-6 mt-10 bg-white rounded-xl shadow-lg">
 	<div class="w-1/2 pr-6">
 		<h2 class="text-2xl font-semibold text-center mb-6 text-gray-700">{editId ? 'Edit Obituary' : 'Create Obituary'}</h2>
