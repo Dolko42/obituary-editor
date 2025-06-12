@@ -63,20 +63,20 @@
 	}
 
 	async function deleteObituary() {
-		if (!obituary) return;
-		
-		deleting = true;
-		try {
-			await pb.collection('obituaries').delete(obituary.id);
-			goto('/dashboard');
-		} catch (err) {
-			console.error('Error deleting obituary:', err);
-			alert('Failed to delete obituary');
-		} finally {
-			deleting = false;
-			showDeleteModal = false;
-		}
-	}
+    if (!confirm('Are you sure you want to delete this obituary? This action cannot be undone.')) {
+        return;
+    }
+    try {
+        deleting = true;
+        await pb.collection('obituaries').delete(obituaryId);
+        goto('/dashboard');
+    } catch (err) {
+        console.error('Error deleting obituary:', err);
+        error = 'Failed to delete obituary. Please try again.';
+    } finally {
+        deleting = false;
+    }
+}
 
 	function formatDate(dateString: string) {
 		return new Date(dateString).toLocaleDateString();
@@ -136,7 +136,7 @@
 				</button>
 
 				<button 
-						on:click={() => showDeleteModal = true}
+						on:click={deleteObituary}
 						class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center"
 					>
 					<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
